@@ -1,0 +1,38 @@
+.articles {
+  .card {
+    transition: all 0.3s;
+    box-shadow: 0 8px 40px -12px rgba(0, 0, 0, 0.3);
+    height: 100%;
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0 16px 70px -12.125px rgba(0, 0, 0, 0.3);
+    }
+
+    .content {
+      text-align: left;
+      padding-bottom: 0;
+      max-height: 8rem;
+    }
+  }
+
+  &-heading {
+    margin: 0 auto;
+  }
+}
+
+.spinner {
+  margin: 100px auto;
+  width: 50px;
+  display: block;
+}
+
+.modal-image {
+  width: 350px;
+  object-fit: cover;
+  float: right;
+  margin: 0 0 1rem 2rem;
+
+  // Give the image beautiful rounded corners
+  border-radius: 0.5rem;
+}

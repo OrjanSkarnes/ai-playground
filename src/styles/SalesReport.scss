@@ -1,0 +1,136 @@
+.sales-report {
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  font-family: 'Open Sans', sans-serif;
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .page-summary {
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  // Give the paragraph a great style
+  .page-summary-paragraph {
+    margin-bottom: 1rem;
+  }
+
+  button {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--primary-color-darker), var(--primary-color));
+
+    &:hover {
+      background: linear-gradient(135deg, var(--primary-color),var(--primary-color-darker));
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    &:disabled {
+      background: none;
+      background-color: var(--color-grey-light);
+      color: var(--color-grey-dark);
+      cursor: not-allowed;
+    
+      &:hover {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+.sales-report-component {
+  margin-bottom: 20px;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.report-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 3fr));
+  grid-gap: 1rem;
+}
+
+.report-item {
+  background-color: var(--secondary-color);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius-base);
+  padding: 10px 20px;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+
+  &.features,
+  &.size,
+  &.condition,
+  &.questions,
+  &.thoughts {
+    grid-column: span 2;
+  }
+
+  &:hover {
+    border-color: var(--primary-color);
+  }
+}
+
+.report-item-lable {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--primary-color);
+}
+
+.report-item-value {
+  margin-top: 5px;
+}
+
+.sales-report-component h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+  .report-summary {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 2fr));
+  }
+}
+
+.fadeIn {
+  animation: fadeIn .8s ease-in-out forwards;
+  opacity: 0;
+}
+
+.page-summary-word {
+  background-color:  rgba(109, 109, 109, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    background-color: rgba(109, 109, 109, 0);;
+    transform: translateY(0);
+  }
+}

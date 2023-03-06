@@ -1,0 +1,102 @@
+button {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-inverse);
+  background-color: var(--primary-color);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius-base);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background-color: var(--primary-color-dark);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4),
+      0 0 0 4px rgba(255, 255, 255, 0.2),
+      0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    background-color: var(--primary-color-darker);
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  &:disabled {
+    background-color: var(--color-grey-light);
+    color: var(--color-grey-dark);
+    cursor: not-allowed;
+  
+    &:hover {
+      background-color: var(--color-grey-light);
+      color: var(--color-grey-dark);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Secondary Button */
+.button-secondary {
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius-base);
+}
+
+.button-secondary:hover {
+  background-color: var(--secondar-color-dark);
+}
+
+.button-secondary:focus {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4),
+    0 0 0 4px rgba(255, 255, 255, 0.2),
+    0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.button-secondary:active {
+  background-color: var(--secondary-color-darker);
+}
+
+.document-upload {
+  margin-bottom: 20px;
+
+  .upload-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .filename {
+      margin-left: 10px;
+      align-self: flex-end;
+    }
+  }
+
+  .file-upload {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    color: var(--color-text-inverse);
+    background-color: var(--tertiary-color);
+    border: none;
+    border-radius: var(--border-radius-base);
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+      background-color: var(--tertiary-color-darker);
+    }
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+}
