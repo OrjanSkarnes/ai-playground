@@ -1,6 +1,15 @@
 import { OpenAIApi, Configuration, ChatCompletionRequestMessage, CreateChatCompletionResponse } from 'openai';
 import { Logger } from './logger';
 
+interface ChatParams {
+  messages?: ChatCompletionRequestMessage[];
+  content?: string;
+  stop?: string;
+  max_tokens?: number;
+  top_p?: number;
+  temperature?: number;
+  stream?: boolean;
+}
 
 export class GPTApi {
   private openai: OpenAIApi;
@@ -28,11 +37,13 @@ export class GPTApi {
     });
   }
 
-  public async getChat(messages: ChatCompletionRequestMessage[], stop?: string) {
+  public async getChat(chatParams: ChatParams) {
     try {
+      const { messages, stop } = chatParams;
+      if (!messages) return "messages is required";
       const completion = await this.openai.createChatCompletion({
         model: "gpt-3.5-turbo",
-        messages: messages,
+        messages,
         stop
       });
       this.logger.info("openai:::::chat:::::done");
@@ -44,21 +55,29 @@ export class GPTApi {
     }
   }
 
-  public async getChatOneMessage(message: string) {
+  public async getChatOneMessage(chatParams: ChatParams): Promise<string> {
+    this.logger.info("openai:::::chat message:::::started");
     try {
-      // create a completion with gpt-3.5-turbo model
+      const { content, stop, max_tokens, top_p, temperature, stream } = chatParams;
+      if (!content) return "content is required";
       const completion = await this.openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: [{
           role: "user",
-          content: message,
+          content,
         }],
+        // stop,
+        max_tokens,
+        top_p,
+        temperature,
+        stream,
       });
       this.logger.info("openai:::::chat message:::::done");
-      return completion.data.choices[0].message?.content;
+      return completion.data.choices[0].message?.content || "";
     }
     catch (error: any) {
-      this.logger.error(error);
+      this.logger.error("openai::::::chat message:::::" + error);
+      return "";
     }
   }
 

@@ -1,8 +1,7 @@
-// Connect to endpoint to get and upload sales report data
 import { getTokens } from '@/lib/tokenizer';
 import axios from 'axios';
 
-export interface SalesReportData {
+export interface SalesStatementData {
   address: string;
   size: string;
   price: string;
@@ -17,18 +16,18 @@ export interface SalesReportData {
 }
 
 const systemInformation =
-  `Welcome to the AI-powered home buying assistant! As an expert in analyzing sales reports, I am here to help you make informed decisions about your potential new home.
+  `Welcome to the AI-powered home buying assistant! As an expert in analyzing sales statements, I am here to help you make informed decisions about your potential new home.
 
-I can provide you with summaries of the most important information from the sales report. This includes key factors such as the condition of the house, location, price, and any potential issues or concerns.
+I can provide you with summaries of the most important information from the sales statement. This includes key factors such as the condition of the house, location, price, and any potential issues or concerns.
 
 In addition, I can provide potential questions to ask during a viewing to gather more information about the property. This will help you make a more informed decision about your potential new home.`
 
-export async function uploadSalesReportToDB(uploadedFile: File) {
+export async function uploadSalesStatementToDB(uploadedFile: File) {
   console.log(uploadedFile)
   const formData = new FormData();
   formData.append('pdfFile', uploadedFile);
 
-  return await axios.post(`/api/sales-report/upload`, formData, {
+  return await axios.post(`/api/sales-statement/upload`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
@@ -43,8 +42,8 @@ export async function uploadSalesReportToDB(uploadedFile: File) {
 }
 
 // Get sales report data
-export async function getSalesReport() {
-  return await axios.get(`/api/sales-report/report`)
+export async function getSalesStatement() {
+  return await axios.get(`/api/sales-statement/report`)
     .then(response => {
       console.log(response)
       return response;
@@ -54,7 +53,7 @@ export async function getSalesReport() {
     });
 }
 
-export async function getSalesReportSummaryJson(message: string) {
+export async function getSalesStatementSummaryJson(message: string) {
 
   const ordinarySystemPrompt = systemInformation + `
   Based on the individual page analyses that I have provided, I can now create a comprehensive overview of the property that includes all the relevant information that a potential buyer needs to make an informed decision.`
@@ -74,7 +73,7 @@ export async function getSalesReportSummaryJson(message: string) {
   
   By following this structured approach, you can ensure that your overview covers all relevant information and provides potential buyers with everything they need to make an informed decision about the property.
   `
-  const structure = `Based on the information you will analyze from the sales report, provide a comprehensive overview of the property. Your response should only be a JSON object with the following keys and string values:
+  const structure = `Based on the information you will analyze from the sales statement, provide a comprehensive overview of the property. Your response should only be a JSON object with the following keys and string values:
 
   {
     "address": "[Location of the property]",
@@ -106,20 +105,31 @@ export async function getSalesReportSummaryJson(message: string) {
     // shorten the prompts to fit within the 4096 token limit
   }
 
-  return axios.post(`api/sales-report/summary`, { request }).then(response => {
-    return response.data;
+  return axios.post(`api/sales-statement/summary`, { request }).then(response => {
+     // Extract the JSON object from the response string using a regular expression
+     const jsonRegex = /{.*}/s;
+     const responseString = response.data.response;
+     const match = responseString.match(jsonRegex);
+     console.log(responseString)
+     if (match) {
+       const jsonResponse = match[0];
+       return JSON.parse(jsonResponse);
+     } else {
+       console.error("No JSON object found in server response:", responseString);
+       return null;
+     }
   }).catch(error => {
     console.log(tokens, error)
     return;
   })
 }
 
-export async function getSalesReportSummaryText(message: string) {
+export async function getSalesStatementSummaryText(message: string) {
 
   const ordinarySystemPrompt = systemInformation + `
   Based on the individual page analyses that I have provided, I can now create a comprehensive overview of the property that includes all the relevant information that a potential buyer needs to make an informed decision.`
 
-  const structure = `Based on the information you have provided, I have analyzed the sales report and created a comprehensive overview of the property. This includes all the relevant information that a potential buyer needs to make an informed decision. 
+  const structure = `Based on the information you have provided, I have analyzed the sales statement and created a comprehensive overview of the property. This includes all the relevant information that a potential buyer needs to make an informed decision. 
 
   My response will be a text summary that is precsise and includes all the details needed when buying a property should at least include location, size, condition, number of bedrooms and bathrooms, notable features, potential costs or fees, potential issues or concerns, questions to ask during a viewing, and my own thoughts on the property.`;
 
@@ -136,7 +146,7 @@ export async function getSalesReportSummaryText(message: string) {
     // shorten the prompts to fit within the 4096 token limit
   }
 
-  return axios.post(`api/sales-report/summary`, { request }).then(response => {
+  return axios.post(`api/sales-statement/summary`, { request }).then(response => {
     return response.data;
   }).catch(error => {
     console.log(tokens, error)
@@ -147,7 +157,7 @@ export async function getSalesReportSummaryText(message: string) {
 
 export async function sendPageInformation(message: string, MAX_TOKENS?: number) {
   const systemPrompt = systemInformation +
-    `Please provide me with a page from the sales report, and I will analyze it to provide you with key information and important factors that a potential buyer should pay attention to. I will highlight any potential issues or concerns that the buyer should be aware of to make an informed decision about the property.
+    `Please provide me with a page from the sales statement, and I will analyze it to provide you with key information and important factors that a potential buyer should pay attention to. I will highlight any potential issues or concerns that the buyer should be aware of to make an informed decision about the property.
 
     My response will be a brief summary of the page, including any relevant information and factors that could affect the buyer's decision. ${ MAX_TOKENS && 'However, to ensure that my response is concise and readable, it will be limited to a maximum of' + MAX_TOKENS + 'tokens. If the summary exceeds this length, I will provide a brief overview of the most important information.'} If there is no useful information found on the page, I will return an empty string.
 
@@ -159,7 +169,7 @@ export async function sendPageInformation(message: string, MAX_TOKENS?: number) 
   ]
 
   const tokens = getTokens(message + systemPrompt);
-  return await axios.post(`/api/sales-report/summary`, { request }).then(response => {
+  return await axios.post(`/api/sales-statement/summary`, { request }).then(response => {
     return response.data;
   })
     .catch(error => {

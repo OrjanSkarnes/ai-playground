@@ -1,9 +1,9 @@
 import React from 'react';
 import {getSentenceAnimation} from '../salesreport';
-import { SalesReportData } from '../services/SalesReportService';
+import { SalesStatementData } from '../services/SalesStatementService';
 
 interface SalesReportProps {
-  data: SalesReportData | undefined;
+  data: SalesStatementData | undefined;
 }
 
 const SalesReportComponent: React.FC<SalesReportProps> = ({ data }) => {
@@ -16,7 +16,7 @@ const SalesReportComponent: React.FC<SalesReportProps> = ({ data }) => {
 };
 
 // Should show the animation for each property and apply correct class
-function getSalesReportAnimation(data: SalesReportData) {
+function getSalesReportAnimation(data: SalesStatementData) {
   if (!data || Object.keys(data).length === 0) return null;
   const list = [
     { label: 'Address', value: data?.address, key: 'address' },

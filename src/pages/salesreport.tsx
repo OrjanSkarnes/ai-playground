@@ -4,45 +4,43 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { CircularProgress, Container, LinearProgress } from "@mui/material";
 import SalesReportComponent from "./components/SalesReportComponent";
 import DocumentUpload from "./components/DocumentUpload";
-import { getSalesReportSummaryJson, getSalesReportSummaryText, SalesReportData, sendPageInformation, uploadSalesReportToDB } from "./services/SalesReportService";
+import { getSalesStatementSummaryJson, getSalesStatementSummaryText, SalesStatementData, sendPageInformation, uploadSalesStatementToDB } from "./services/SalesStatementService";
 import { getTokens } from "@/lib/tokenizer";
 
 export default function SalesReport() {
-  const [salesReport, setSalesReport] = useState<SalesReportData | undefined>();
-  const [summarizedSalesReportList, setSummarizedSalesReportList] = useState<string[]>([]);
+  const [salesStatement, setSalesStatement] = useState<SalesStatementData | undefined>();
+  const [summarizedSalesStatementList, setSummarizedSalesStatementList] = useState<string[]>([]);
   const [progress, setProgress] = useState<number>(100);
-  const [loading, setLoading] = useState<boolean>(false);
   const [pdfFile, setPdfFile] = useState<File | undefined>();
   const [masterLoading, setMasterLoading] = useState<boolean>(false);
   const [masterSummary, setMasterSummary] = useState<string | undefined>();
 
   const pdfPagesRef = useRef<string[]>([]);
-  const summarizedSalesReportListRef = useRef<string[]>([]);
+  const summarizedSalesStatementListRef = useRef<string[]>([]);
 
 
   useEffect(() => {
-    const summary = localStorage.getItem("salesReportSummary");
-    const summaryList = localStorage.getItem("salesReportSummaryList");
+    const summary = localStorage.getItem("salesStatementSummary");
+    const summaryList = localStorage.getItem("salesStatementSummaryList");
     if (summary && summary.length > 0) {
-      setSalesReport(JSON.parse(summary));
+      setSalesStatement(JSON.parse(summary));
     }
     if (summaryList && summaryList.length > 0) {
-      setSummarizedSalesReportList(JSON.parse(summaryList));
+      setSummarizedSalesStatementList(JSON.parse(summaryList));
     }
   }, []);
 
-  const uploadSalesReport = async (file: File) => {
-    setLoading(true);
-    const response = await uploadSalesReportToDB(file);
+  const uploadSalesStatement = async (file: File) => {
+    const response = await uploadSalesStatementToDB(file);
     pdfPagesRef.current = response.data.text;
     setPdfFile(file);
-    setLoading(false);
   }
 
   const generateSummary = useCallback(async () => {
     setProgress(0);
     setMasterLoading(true);
-    summarizedSalesReportListRef.current = [];
+    summarizedSalesStatementListRef.current = [];
+    setSummarizedSalesStatementList([]);
 
     const tokenLimit = 3900;
 
@@ -68,16 +66,16 @@ export default function SalesReport() {
     });
 
     let progress = 0;
-    const summary: string[] = []
     await Promise.allSettled(
       summarizationPromises.map(async (summ) => {
         const value = await summ;
         progress++;
         setProgress((progress / summarizationPromises.length) * 100);
-        summarizedSalesReportListRef.current.push(value);
+        summarizedSalesStatementListRef.current.push(value);
+        setSummarizedSalesStatementList(summarizedSalesStatementListRef.current);
       })
     );
-    await getMasterSummary(summarizedSalesReportListRef.current);
+    await getMasterSummary(summarizedSalesStatementListRef.current);
   }, []);
 
 
@@ -86,14 +84,13 @@ export default function SalesReport() {
       return;
     }
     const summaryString = summary.join(" ");
-    const jsonResp = await getSalesReportSummaryJson(cleanText(summaryString));
-    const salesReportJson: SalesReportData = JSON.parse(jsonResp.response);
-    localStorage.setItem("salesReportSummaryList", JSON.stringify(summary));
-    localStorage.setItem("salesReportSummary", JSON.stringify(salesReportJson));
-    setSalesReport(salesReportJson);
+    const jsonResp = await getSalesStatementSummaryJson(summaryString);
+    localStorage.setItem("salesStatementSummaryList", JSON.stringify(summary));
+    localStorage.setItem("salesStatementSummary", JSON.stringify(jsonResp));
+    setSalesStatement(jsonResp);
     setMasterLoading(false);
 
-    // const masterSummaryResp = await getSalesReportSummaryText(cleanText(summaryString));
+    // const masterSummaryResp = await getSalesStatementSummaryText(cleanText(summaryString));
     // setMasterSummary(masterSummaryResp.response);
   }, []);
 
@@ -105,16 +102,16 @@ export default function SalesReport() {
 
   return (
     <Container className="sales-report" style={{ whiteSpace: "pre-wrap" }}>
-      <h2>Sales Report</h2>
-      <DocumentUpload onUpload={uploadSalesReport} />
+      <h2>Sales Statement</h2>
+      <DocumentUpload onUpload={uploadSalesStatement} />
       <button type="button" onClick={generateSummary} disabled={pdfFile === undefined || pdfFile === null}>Generate Summary</button>
-      <button type="button" onClick={() => getMasterSummary(summarizedSalesReportList)}>Generate Master Summary</button>
+      <button type="button" onClick={() => getMasterSummary(summarizedSalesStatementList)}>Generate Master Summary</button>
 
-      {masterLoading ? (<div className="spinner"><CircularProgress color="success" /></div>) : (<SalesReportComponent data={salesReport} />)}
+      {masterLoading ? (<div className="spinner"><CircularProgress color="success" /></div>) : (<SalesReportComponent data={salesStatement} />)}
 
       {masterSummary && getSentenceAnimation(masterSummary, 0.005)}
       {progress < 100 && <LinearProgress variant="determinate" value={progress} />}
-      {summarizedSalesReportList && getListAnimation(summarizedSalesReportList)}
+      {summarizedSalesStatementList && getListAnimation(summarizedSalesStatementList)}
     </Container>
   );
 }

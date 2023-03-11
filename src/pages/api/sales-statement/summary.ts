@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(200).json({ response: cachedResponse });
       return;
     }
-    gptApi.getChat(prompt).then((response: any) => {
+    gptApi.getChat({messages: prompt}).then((response: any) => {
       cache.set(JSON.stringify(prompt), response.choices[0].message.content)
       res.status(200).json({ response: response.choices[0].message.content });
     }).catch((error) => {
