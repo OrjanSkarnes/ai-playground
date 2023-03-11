@@ -7,7 +7,6 @@ import { getTokens } from "@/lib/tokenizer";
 import { Writable } from "stream";
 import { allSettled, extractPdfData, getTokensFromString } from "../utils";
 
-
 // disable next.js' default body parser
 export const config = {
   api: { bodyParser: false }
@@ -17,14 +16,8 @@ export const config = {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-interface Summary {
-  summary: string;
-  pages: string[];
-  batches?: string[];
-}
-
 const cache = new Map<string, string>();
-
+const summaryCache = new Map<string, string>();
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   logger.info("url:::::" + req.url);
   if (req.method === 'POST') {
@@ -40,57 +33,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!text) return res.status(400).json("No text found in PDF file.");
         const pages = text.map(page => page);
 
-        // const summary = summarizeText(pages.join(''));
-        // res.status(200).json(summary);
+        const summary = await summarizeText(pages.join(''));
+        res.status(200).json(summary);
 
-        summarizePdfPages(pages, res).then((summaries) => {
-          res.status(200).json(summaries);
-          // cache.set(fileName, summaries);
-        }).catch((err) => {
-          res.status(400).json({ message: err.message });
-        });
+        // summarizePdfPages(pages, res).then((summaries) => {
+      //     res.status(200).json(summaries);
+      //     // cache.set(fileName, summaries);
+      //   }).catch((err) => {
+      //     res.status(400).json({ message: err.message });
+      //   });
       }
     })
   } else {
     res.status(405).json({ message: 'We only support POST' })
   }
 }
-
-
-
-  // Constants
-const MAX_TOKENS = 384;
-const MAX_CONTEXT_DEPTH = 3;
-// Summarization model
-function summarize(text: string, previousContext: string[]): string {
-  // Replace with your own summarization model
-  return text.slice(0, 50) + '...';
-}
-
-// Chunkify text into smaller pieces
-function chunkifyText(text: string): string[] {
-  // Split the text at whitespace boundaries into smaller chunks
-  const chunks = text.split(/[\n\r\s]+/);
-  const chunkified = [];
-
-  // Chunkify until we have chunks of similar lengths
-  let chunk = '';
-  for (let i = 0; i < chunks.length; i++) {
-    if (getTokensFromString(chunk + chunks[i]) <= MAX_TOKENS) {
-      chunk += chunks[i] + ' ';
-    } else {
-      chunkified.push(chunk.trim());
-      chunk = chunks[i] + ' ';
-    }
-  }
-  if (chunk.length > 0) {
-    chunkified.push(chunk.trim());
-  }
-  
-  return chunkified;
-}
-
-
 
 // Task node interface
 interface TaskNode {
@@ -100,36 +57,110 @@ interface TaskNode {
   subtasks?: TaskNode[];
 }
 
+// Constants
+const MAX_TOKENS = 680;
+const MAX_REQUEST_SIZE = 4024;
+const MAX_CONTEXT_DEPTH = 3;
+// Summarization model
+async function summarize(text: string, previousContext: string[]): Promise<string> {
+  const prompt = `Summarize the following text:\n\n${text}\n\nSummary:`;
+
+   // Check if we have a cached result for this prompt
+    if (summaryCache.has(prompt)) {
+      logger.info('Using cached summary');
+      // @ts-ignore
+      return summaryCache.get(prompt);
+    }
+
+  if (getTokensFromString(prompt) > MAX_REQUEST_SIZE) {
+    logger.error('Request size too large');
+    return '';
+  }
+
+  return await gptApi.getChatOneMessage({content: prompt}).then((response) => {
+    summaryCache.set(prompt, response); // Cache the result
+    return response;
+  }).catch((err) => {
+    logger.error("failed to summarize" + err);
+    return '';
+  });
+}
+
+// Chunkify text into smaller pieces
+function chunkifyText(text: string): string[] {
+  // Split text into sentences
+  const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!\:)\s+|\p{Cc}+|\p{Cf}+/)
+   // Group sentences into chunks based on token count
+   const chunkified = [];
+   let chunk = '';
+
+   sentences.forEach((sentence) => {
+      if (getTokens(sentence) > MAX_TOKENS) {
+        logger.error('Sentence too long');
+        return;
+      }
+      if (getTokensFromString(chunk + sentence) <= MAX_TOKENS) {
+        chunk += sentence + ' ';
+      } else {
+        chunkified.push(chunk.trim());
+        chunk = sentence + ' ';
+      }
+    });
+    if (chunk.length > 0) {
+      chunkified.push(chunk.trim());
+    }
+
+  return chunkified;
+}
+
 // Decompose a task into subtasks if needed
-function decomposeIfNeeded(task: TaskNode): TaskNode {
+async function decomposeIfNeeded(task: TaskNode): Promise<TaskNode> {
   // If the text is short enough, summarize it directly
   if (getTokensFromString(task.text) <= MAX_TOKENS) {
-    const summary = summarize(task.text, task.previousContext);
+    const summary = await summarize(task.text, task.previousContext);
+    return { text: summary, depth: task.depth, previousContext: task.previousContext };
+  }
+
+  // If the context is too deep, summarize it directly
+  if (task.depth >= MAX_CONTEXT_DEPTH) {
+    logger.info('Context too deep, summarizing directly')
+    const summary = await summarize(task.text, task.previousContext);
     return { text: summary, depth: task.depth, previousContext: task.previousContext };
   }
 
   // Split the text into smaller chunks
   const chunks = chunkifyText(task.text);
-  const subtasks: TaskNode[] = [];
-
-  // Recursively summarize each chunk
-  for (let i = 0; i < chunks.length; i++) {
-    const subtask = { text: chunks[i], depth: task.depth + 1, previousContext: [...task.previousContext, chunks.slice(0, i)] } as TaskNode;
-    subtasks.push(decomposeIfNeeded(subtask));
+  if (chunks.length === 0) {
+    const summary = await summarize(task.text, task.previousContext);
+    return { text: summary, depth: task.depth, previousContext: task.previousContext };
   }
 
+  // Recursively summarize each chunk
+  const subtasksPromises = chunks.map((chunk, i) => {
+    const subtask = { text: chunk, depth: task.depth + 1, previousContext: [...task.previousContext, chunks.slice(0, i)] } as TaskNode;
+    return decomposeIfNeeded(subtask);
+  });
+
+  // Wait for all the subtasks to be summarized
+  const subtasks = await Promise.all(subtasksPromises)
+
   // Concatenate the subtask summaries
-  const summary = subtasks.map(subtask => subtask.text).join('\n');
-  return { text: summarize(summary, task.previousContext), depth: task.depth, previousContext: task.previousContext, subtasks };
+  const summary = subtasks.map(subtask => subtask.text).join('\n\n');
+  return { text: await summarize(summary, task.previousContext), depth: task.depth, previousContext: task.previousContext, subtasks };
 }
 
 // Summarize a text using the algorithmic decomposition approach
-function summarizeText(text: string): string {
+async function summarizeText(text: string): Promise<TaskNode> {
   const rootTask: TaskNode = { text, depth: 0, previousContext: [] };
-  const summary = decomposeIfNeeded(rootTask);
-  return summary.text;
+  const summary = await decomposeIfNeeded(rootTask);
+  return summary;
 }
 
+interface Summary {
+  summary: string;
+  pages: string[];
+  batches?: string[];
+}
 
 /**
  * This function takes in a list of PDF pages, cleans and concatenates them into a long string,

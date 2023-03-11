@@ -22,7 +22,7 @@ export const extractPdfData = async (buffer: any, pages: number = 40) => {
 // A helpful rule of thumb is that one token generally corresponds to ~4 characters of text for common English text. This translates to roughly ¾ of a word (so 100 tokens ~= 75 words).
 // We should take error margin into account and allow a bit mor tokens for each character so we multiply by 0.32
 export const getTokensFromString = (text: string): number => {
-  return Math.ceil(text.length * 0.36);
+  return Math.ceil(text.length * 0.30);
 };
 
 

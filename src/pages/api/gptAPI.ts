@@ -1,3 +1,4 @@
+import { getTokens } from '@/lib/tokenizer';
 import { OpenAIApi, Configuration, ChatCompletionRequestMessage, CreateChatCompletionResponse } from 'openai';
 import { Logger } from './logger';
 
@@ -57,9 +58,12 @@ export class GPTApi {
 
   public async getChatOneMessage(chatParams: ChatParams): Promise<string> {
     this.logger.info("openai:::::chat message:::::started");
+    const { content, stop, max_tokens, top_p, temperature, stream } = chatParams;
+    if (!content) {
+      this.logger.error("openai:::::chat message:::::content is required");
+      return "";
+    }
     try {
-      const { content, stop, max_tokens, top_p, temperature, stream } = chatParams;
-      if (!content) return "content is required";
       const completion = await this.openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: [{
@@ -76,7 +80,7 @@ export class GPTApi {
       return completion.data.choices[0].message?.content || "";
     }
     catch (error: any) {
-      this.logger.error("openai::::::chat message:::::" + error);
+      this.logger.error("openai::::::chat message:::::length:::::" + getTokens(content) +"::::error::::" + error);
       return "";
     }
   }
