@@ -14,7 +14,7 @@ button {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    background-color: var(--primary-color-dark);
+    background-color: var(--primary-color-darker);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
   }

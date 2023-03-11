@@ -1,3 +1,4 @@
+import { Accordion, AccordionDetails, AccordionSummary, Box, Container, Divider, Fade } from "@mui/material";
 import { useState } from "react";
 import { TaskNode } from "./interfaces/task";
 import { getPdfSummary } from "./services/PdfService";
@@ -7,6 +8,7 @@ const SummarizePDF = () => {
   const [summary, setSummary] = useState('');
   const [tasks, setTasks] = useState<TaskNode[]>([]);
   const [question, setQuestion] = useState<String[]>([]);
+  const [expanded, setExpanded] = useState(false);
 
   const handlePdfFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -16,7 +18,7 @@ const SummarizePDF = () => {
     }
   };
 
-  const handleSummarizeClick  = async () => {
+  const handleSummarizeClick = async () => {
     if (pdfFile) {
       const response = await getPdfSummary(pdfFile);
       setSummary(response.data.text);
@@ -31,35 +33,44 @@ const SummarizePDF = () => {
   };
 
   return (
-    <div>
-      <h1>PDF Summarizer</h1>
-      <div>
-        <label htmlFor="pdf-file-input">Select PDF file to summarize:</label>
-        <input type="file" id="pdf-file-input" onChange={handlePdfFileChange} />
-      </div>
-      <button onClick={handleSummarizeClick}>Summarize</button>
-      {summary && (
+    <Container >
+      <Box className="pdf-summarizer">
+        <h1>PDF Summarizer</h1>
         <div>
-          <h2>Summary:</h2>
-          <p>{summary}</p>
+          <label htmlFor="pdf-file-input">Select PDF file to summarize:</label>
+          <input type="file" id="pdf-file-input" onChange={handlePdfFileChange} />
         </div>
-      )}
-      {tasks?.length > 0 && (
-        <div>
-          <h2>Tasks:</h2>
-          <ul>
-            {tasks.map((task, index) => (
-              <li key={index}>{task.text}</li>
-            ))}
-          </ul>
-          <div>
+        <button onClick={handleSummarizeClick}>Summarize</button>
+        {summary && tasks?.length > 0 && (
+          <Accordion expanded={expanded} TransitionProps={{}} className="expandable-panel">
+            <AccordionSummary onClick={() => setExpanded(!expanded)} style={{minHeight: "64px"}}>
+              <div>
+                <h2>Compressed Summary</h2>
+                <p>{summary}</p>
+              </div>
+            </AccordionSummary>
+            <Divider sx={{ borderBottomWidth: 2 }} />
+            <AccordionDetails >
+              <h3>Longer Summary</h3>
+              <ul>
+                {tasks.map((task, index) => (
+                  <li key={index}>{task.text}</li>
+                ))}
+              </ul>
+            </AccordionDetails>
+          </Accordion>
+        )}
+        {summary && (
+          <div className="question">
             <label htmlFor="question-input">Ask a question:</label>
-            <input type="text" id="question-input" value={question} onChange={(event) => setQuestion(event.target.value)} />
-            <button onClick={handleAskQuestionClick}>Ask</button>
+            <div className="question--input-area">
+              <input type="text" id="question-input" value={question} onChange={(event) => setQuestion(event.target.value)} />
+              <button onClick={handleAskQuestionClick}>Ask</button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </Box>
+    </Container>
   );
 };
 
