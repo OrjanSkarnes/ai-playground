@@ -9,4 +9,4 @@ const imageSchema = new mongoose.Schema({
     name: { type: String, required: true, index: true },
 });
 
-export const ImageModel = mongoose.model('Image', imageSchema);
+export const ImageModel = mongoose.models.Image || mongoose.model('Image', imageSchema);

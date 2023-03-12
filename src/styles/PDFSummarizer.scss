@@ -1,7 +1,4 @@
 .pdf-summarizer {
-  max-width: 600px; 
-  margin: 0 auto;
-
   ul {
     list-style: none;
     margin: 0;
@@ -42,7 +39,7 @@
 
   
   button {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
     padding: 10px 20px;
     border: none;

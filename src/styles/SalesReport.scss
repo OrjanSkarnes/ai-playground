@@ -15,8 +15,8 @@
   }
 
   .page-summary {
-    border: 1px solid var(--primary-color);
-    border-radius: 4px;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-base);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     padding: 1rem;
     margin-top: 2rem;
@@ -31,10 +31,15 @@
   button {
     font-family: 'Montserrat', sans-serif;
     font-size: 1.2rem;
-    background: linear-gradient(135deg, var(--primary-color-darker), var(--primary-color));
+    background: linear-gradient(135deg, var(--color-primary-darker), var(--color-primary));
+    border-radius: var(--border-radius-base);
+    border: none;
+    color: var(--color-text-inverse);
+    padding: 12px 20px;
+    transition: all 0.3s ease;
 
     &:hover {
-      background: linear-gradient(135deg, var(--primary-color),var(--primary-color-darker));
+      background: linear-gradient(135deg, var(--color-primary),var(--color-primary-darker));
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
       transform: translateY(-2px);
     }
@@ -55,8 +60,8 @@
 
 .sales-report-component {
   margin-bottom: 20px;
-  border: 1px solid var(--primary-color);
-  border-radius: 4px;
+  border: 1px solid var(--color-primary-color);
+  border-radius: var(--border-radius-base);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   padding: 1rem;
   margin-top: 2rem;
@@ -65,12 +70,12 @@
 
 .report-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 3fr));
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   grid-gap: 1rem;
 }
 
 .report-item {
-  background-color: var(--secondary-color);
+  background-color: var(--color-secondary);
   border: 1px solid #e0e0e0;
   border-radius: var(--border-radius-base);
   padding: 10px 20px;
@@ -86,14 +91,14 @@
   }
 
   &:hover {
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
   }
 }
 
 .report-item-lable {
   font-weight: bold;
   margin-bottom: 5px;
-  color: var(--primary-color);
+  color: var(--color-primary);
 }
 
 .report-item-value {
@@ -104,14 +109,26 @@
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 10px;
-  color: var(--primary-color);
-}
-
-@media (max-width: 768px) {
-  .report-summary {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 2fr));
+  color: var(--color-primary);
   }
-}
+
+  @media (max-width: 1199px) {
+    .report-summary {
+      grid-template-columns: repeat(auto-fit, minmax(350px, 2.5fr));
+    }
+  }
+  
+  @media (max-width: 991px) {
+    .report-summary {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 2fr));
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .report-summary {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1.5fr));
+    }
+  }
 
 .fadeIn {
   animation: fadeIn .8s ease-in-out forwards;

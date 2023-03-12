@@ -2,7 +2,6 @@
 
 import { ImageModel } from "@/models/imageModel";
 import { NextApiRequest, NextApiResponse } from "next";
-import { gptApi } from "../gptAPI";
 import { logger } from "../logger";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -1,35 +1,58 @@
 :root {
   --font-family: 'Open Sans', sans-serif;
-  --font-size-base: 16px;
-  --line-height-base: 1.5;
-  --border-radius-base: 4px;
-  --border: --border-radius-base solid #e9ecef;
-  --box-shadow-base: 0px 2px 4px rgba(0, 0, 0, 0.1);
+   /* Font sizes */
+   --font-size-xs: 0.75rem;
+   --font-size-sm: 0.875rem;
+   --font-size-md: 1rem;
+   --font-size-lg: 1.25rem;
+   --font-size-xl: 1.5rem;
+   --font-size-xxl: 2rem;
 
-  --primary-color: #007bff;
-  --primary-color-dark: #0062cc;
-  --primary-color-darker: #005cbf;
-  --secondary-color: #f5f5f5;
-  --secondary-color-dark: #5a6268;
-  --secondary-color-darker: #545b62;
-  --tertiary-color: rgb(136, 100, 235);
-  --tertiary-color-dark: rgb(104, 65, 202);
-  --tertiary-color-darker: rgb(60, 23, 146);
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
-  --light-color: #f8f9fa;
-  --dark-color: #343a40;
+    --font-size-base: var(--font-size-md);
+ 
+   /* Line height */
+   --line-height-base: 1.5;
+
+   /* Border radius */
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 1rem;
+
+  --border-radius-base: var(--border-radius-sm);
+
+  --border: var(--border-radius-base) solid #e9ecef;
+
+  /* Box shadow */
+  --box-shadow-sm: 0px 1px 2px rgba(0, 0, 0, 0.05);
+  --box-shadow-md: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  --box-shadow-lg: 0px 10px 15px rgba(0, 0, 0, 0.1);
+  --box-shadow-xl: 0px 20px 25px rgba(0, 0, 0, 0.1);
+  --box-shadow-xxl: 0px 25px 50px rgba(0, 0, 0, 0.25);
+
+  --box-shadow-base: var(--box-shadow-md);
+
+  /* Colors */
+  --color-primary: #283593;
+  --color-primary-dark: #001064;
+  --color-primary-darker: #000051;
+  --color-secondary: #f5f5f5;
+  --color-secondary-dark: #e5e5e5;
+  --color-secondary-darker: #d6d6d6;
+  --color-tertiary: #ffb900;
+  --color-tertiary-dark: #ff8c00;
+  --color-tertiary-darker: #ff6c00;
+  --color-success: #4caf50;
+  --color-danger: #f44336;
+  --color-warning: #ffc107;
+  --color-info: #2196f3;
+  --color-light: #f8f9fa;
+  --color-dark: #343a40;
   --color-text-inverse: #fff;
 
   --color-grey-light: gray;
   --color-grey-dark: #343a40;
 
-  --dark-color: #000814;
-  --medium-dark-color: #14213d;
-  --medium-color: #fca311;
-  --medium-light-color: #e5e5e5;
+  --sidebar-width: 200px;
 }
 
 * {
@@ -45,6 +68,49 @@ body {
   font-size: var(--font-size-base);
   font-family: var(--font-family);
   line-height: var(--line-height-base);
+}
+
+/* Set global styles for the body and typography */
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-dark);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: var(--font-size-base);
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.8rem;
+}
+
+h3 {
+  font-size: 1.6rem;
+}
+
+h4 {
+  font-size: 1.4rem;
+}
+
+h5 {
+  font-size: 1.2rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--font-size-base);
 }
 
 

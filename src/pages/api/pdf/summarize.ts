@@ -3,9 +3,7 @@ import { gptApi } from "../gptAPI";
 import { logger } from "../logger";
 
 import multer from 'multer';
-import { getTokens } from "@/lib/tokenizer";
-import { Writable } from "stream";
-import { allSettled, extractPdfData, getTokensFromString } from "../utils";
+import { extractPdfData, getTokensFromString } from "../utils";
 
 // disable next.js' default body parser
 export const config = {
@@ -54,6 +52,7 @@ interface TaskNode {
   text: string;
   depth: number;
   previousContext: string[];
+  height?: number;
   subtasks?: TaskNode[];
 }
 
@@ -115,19 +114,11 @@ function chunkifyText(text: string, maxTokens: number = MAX_CHUNK_SIZE): string[
 // Decompose a task into subtasks if needed
 async function decomposeIfNeeded(task: TaskNode, maxTokens: number = MAX_CHUNK_SIZE): Promise<TaskNode> {
   // If the text is short enough, summarize it directly
-  if (getTokensFromString(task.text) <= maxTokens) {
-    logger.info('Text short enough, summarizing directly')
+  if (task.depth >= MAX_CONTEXT_DEPTH || getTokensFromString(task.text) <= maxTokens) {
+    logger.info('Text short enough or context too deep, summarizing directly')
     const summary = await summarize(task.text, task.previousContext);
     return { text: summary, depth: task.depth, previousContext: task.previousContext };
   }
-
-  // If the context is too deep, summarize it directly
-  if (task.depth >= MAX_CONTEXT_DEPTH) {
-    logger.info('Context too deep, summarizing directly')
-    const summary = await summarize(task.text, task.previousContext);
-    return { text: summary, depth: task.depth, previousContext: task.previousContext };
-  }
-
   // Split the text into smaller chunks
   const chunks = chunkifyText(task.text, maxTokens);
   if (chunks.length === 0) {
@@ -163,10 +154,4 @@ async function summarizeText(text: string): Promise<TaskNode> {
   const rootTask: TaskNode = { text, depth: 0, previousContext: [] };
   const summary = await decomposeIfNeeded(rootTask);
   return summary;
-}
-
-interface Summary {
-  summary: string;
-  pages: string[];
-  batches?: string[];
 }

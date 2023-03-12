@@ -1,7 +1,7 @@
 // React functional component to upload and display sales report data
 // @ts-ignore
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CircularProgress, Container, LinearProgress } from "@mui/material";
+import { Box, CircularProgress, Container, LinearProgress } from "@mui/material";
 import SalesReportComponent from "./components/SalesReportComponent";
 import DocumentUpload from "./components/DocumentUpload";
 import { getSalesStatementSummaryJson, getSalesStatementSummaryText, SalesStatementData, sendPageInformation, uploadSalesStatementToDB } from "./services/SalesStatementService";
@@ -101,7 +101,8 @@ export default function SalesReport() {
   }, []);
 
   return (
-    <Container className="sales-report" style={{ whiteSpace: "pre-wrap" }}>
+    <Container  style={{ whiteSpace: "pre-wrap" }}>
+      <Box className="sales-report">
       <h2>Sales Statement</h2>
       <DocumentUpload onUpload={uploadSalesStatement} />
       <button type="button" onClick={generateSummary} disabled={pdfFile === undefined || pdfFile === null}>Generate Summary</button>
@@ -112,6 +113,7 @@ export default function SalesReport() {
       {masterSummary && getSentenceAnimation(masterSummary, 0.005)}
       {progress < 100 && <LinearProgress variant="determinate" value={progress} />}
       {summarizedSalesStatementList && getListAnimation(summarizedSalesStatementList)}
+      </Box>
     </Container>
   );
 }

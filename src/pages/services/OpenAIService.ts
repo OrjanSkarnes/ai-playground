@@ -27,7 +27,7 @@ export async function fetchAllArticles() {
 }
 
 // the express rout is this.express.get("openai/images/:prompt"
-export async function getAllImages() {
+export async function getAllImages() : Promise<{url: string, name: string}[] | undefined> {
   const response = await axios.get(`/api/openai/images`)
   // Handle error
   if (response.status !== 200) {
@@ -76,7 +76,7 @@ export async function getImageGeneration(prompt: string) {
 }
 
 
-export const getImageUrl = (images: any, getName?: boolean) => {
+export const getImageUrl = (images: any, getName?: boolean): any | undefined => {
   if (!images || images.length === 0) return null;
   const urls: string[] = []
   const imageUrlsAndNames: any[] = [];

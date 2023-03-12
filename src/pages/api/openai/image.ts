@@ -63,7 +63,7 @@ const getImage = async (prompt: string, n?: number) => {
                           "style": style or artistic influence,
                           "mood": "mood or atmosphere
                       }`;
-  const topicGeneration = await gptApi.getChatOneMessage(topicPrompt);
+  const topicGeneration = await gptApi.getChatOneMessage({content: topicPrompt});
   if (topicGeneration === undefined) {
     return;
   }
